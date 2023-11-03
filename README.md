@@ -1,0 +1,1 @@
+This is an example of client-server communication using sockets.
