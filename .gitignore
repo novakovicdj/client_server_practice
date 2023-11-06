@@ -1,0 +1,8 @@
+.vscode/*
+client/logs/*
+client/build/*
+client/obj/*
+server/logs/*
+server/build/*
+server/obj/*
+logger/obj/*

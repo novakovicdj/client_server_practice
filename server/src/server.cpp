@@ -6,13 +6,17 @@
 #include <chrono>
 #include <ctime>
 #include <iostream>
+#include <sstream>
 #include <vector>
 
+#include "my_logger.h"
 #include "serv_exceptions.h"
 
 #define PORT_NO 20001
 
 using namespace std;
+
+MyLogger my_logg("srv");
 
 int main() {
   int socket_fd, new_socekt_fd;
@@ -21,11 +25,15 @@ int main() {
   socklen_t cli_addr_size = sizeof(cli_addr);
 
   // for some time and date output
-  auto time_now = chrono::system_clock::to_time_t(chrono::system_clock::now());
+  // auto time_now =
+  // chrono::system_clock::to_time_t(chrono::system_clock::now());
   bool end = false;
   vector<int> data;
   int num;
   char buffer[16];
+
+  string msg;
+  stringstream ss(msg);
 
   try {
     socket_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -55,9 +63,17 @@ int main() {
         close(new_socekt_fd);
         throw SocketReadException();
       }
+      ss.str(string());
+      ss.clear();
+      ss << "Got command " << num;
+      my_logg.writeOutput(ss.str());
       switch (num) {
         case 0:  // close program, cmd 0
-          cout << ctime(&time_now) << "| Closing program...";
+          // cout << ctime(&time_now) << "| Closing program...";
+          ss.str(string());
+          ss.clear();
+          ss << "Closing program...";
+          my_logg.writeOutput(ss.str());
           close(new_socekt_fd);
           end = true;
           break;
@@ -68,8 +84,12 @@ int main() {
             throw SocketReadException();
           }
           data.push_back(num);
-          cout << ctime(&time_now) << "| Pushed " << num << " to the back"
-               << endl;
+          // cout << ctime(&time_now) << "| Pushed " << num << " to the back"
+          //      << endl;
+          ss.str(string());
+          ss.clear();
+          ss << "Pushed " << num << " to the back";
+          my_logg.writeOutput(ss.str());
           break;
         case 2:  // pop_back, cmd 2
           // if there are any data in vector
@@ -81,8 +101,13 @@ int main() {
               close(new_socekt_fd);
               throw SocketSendException();
             }
-            cout << ctime(&time_now) << "| Popped " << num << " from the back"
-                 << endl;
+            // cout << ctime(&time_now) << "| Popped " << num << " from the
+            // back"
+            //      << endl;
+            ss.str(string());
+            ss.clear();
+            ss << "Popped " << num << "from the back";
+            my_logg.writeOutput(ss.str());
           } else {
             num = -1;
             // return -1 to client if there is no data in vector
@@ -90,8 +115,12 @@ int main() {
               close(new_socekt_fd);
               throw SocketSendException();
             }
-            cout << ctime(&time_now)
-                 << "| Can't pop anything because vector is empty" << endl;
+            // cout << ctime(&time_now)
+            //      << "| Can't pop anything because vector is empty" << endl;
+            ss.str(string());
+            ss.clear();
+            ss << "Can't pop anything because vector is empty";
+            my_logg.writeOutput(ss.str());
           }
           break;
         case 3:  // size, cmd 3
@@ -101,15 +130,27 @@ int main() {
             close(new_socekt_fd);
             throw SocketSendException();
           }
-          cout << ctime(&time_now) << "| Sent size (" << num
-               << ") to the client" << endl;
+          // cout << ctime(&time_now) << "| Sent size (" << num
+          //      << ") to the client" << endl;
+          ss.str(string());
+          ss.clear();
+          ss << "Sent size (" << num << ") to the client";
+          my_logg.writeOutput(ss.str());
           break;
         case 4:  // clear, cmd 4
           data.clear();
-          cout << ctime(&time_now) << "| Vector data cleared" << endl;
+          // cout << ctime(&time_now) << "| Vector data cleared" << endl;
+          ss.str(string());
+          ss.clear();
+          ss << "Vector is cleared";
+          my_logg.writeOutput(ss.str());
           break;
         default:  // unknown command, do not do anything
-          cout << ctime(&time_now) << "| Unknown command" << endl;
+          // cout << ctime(&time_now) << "| Unknown command" << endl;
+          ss.str(string());
+          ss.clear();
+          ss << "Unknown command";
+          my_logg.writeOutput(ss.str());
           break;
       }
     }

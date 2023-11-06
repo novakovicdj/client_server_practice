@@ -7,12 +7,16 @@
 #include <chrono>
 #include <ctime>
 #include <iostream>
+#include <sstream>
 
 #include "cli_exceptions.h"
+#include "my_logger.h"
 
 #define PORT_NO 20001
 
 using namespace std;
+
+MyLogger my_logg("cli");
 
 int main() {
   int socket_fd;
@@ -21,6 +25,8 @@ int main() {
   auto time_now = chrono::system_clock::to_time_t(chrono::system_clock::now());
   bool end = false;
   int num;
+  string msg;
+  stringstream ss(msg);
 
   try {
     socket_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -50,9 +56,17 @@ int main() {
         throw SocketSendException();
       }
       // cout << "| Sent command " << num << endl;
+      ss.str(string());
+      ss.clear();
+      ss << "Sent command " << num;
+      my_logg.writeOutput(ss.str());
       switch (num) {
         case 0:  // close program
-          cout << ctime(&time_now) << "| Closing program...";
+          // cout << ctime(&time_now) << "| Closing program...";
+          ss.str(string());
+          ss.clear();
+          ss << "Closing program...";
+          my_logg.writeOutput(ss.str());
           end = true;
           break;
         case 1:
@@ -62,33 +76,60 @@ int main() {
           if (send(socket_fd, &num, sizeof(num), 0) < 0) {
             throw SocketSendException();
           }
-          cout << ctime(&time_now) << "| Pushed " << num << " to the back"
-               << endl;
+          // cout << ctime(&time_now) << "| Pushed " << num << " to the back"
+          //      << endl;
+          ss.str(string());
+          ss.clear();
+          ss << "Pushed " << num << " to the back";
+          my_logg.writeOutput(ss.str());
           break;
         case 2:  // pop back
           // wait for server to send popped data
           if (read(socket_fd, &num, sizeof(num)) < 0) {
             throw SocketReadException();
           }
-          if (num != -1)  // -1 will be sent if there is no data
-            cout << ctime(&time_now) << "| " << num << " popped from the back"
-                 << endl;
-          else
-            cout << ctime(&time_now)
-                 << "| Can't pop anything because vector is empty" << endl;
+          if (num != -1) {  // -1 will be sent if there is no data
+            // cout << ctime(&time_now) << "| " << num << " popped from the
+            // back"
+            //      << endl;
+            ss.str(string());
+            ss.clear();
+            ss << num << " popped from the back";
+            my_logg.writeOutput(ss.str());
+          } else {
+            // cout << ctime(&time_now)
+            //      << "| Can't pop anything because vector is empty" << endl;
+            ss.str(string());
+            ss.clear();
+            ss << "Can't pop anything because vector is empty";
+            my_logg.writeOutput(ss.str());
+          }
           break;
         case 3:  // size
           // wait for size to be sent from server
           if (read(socket_fd, &num, sizeof(num)) < 0) {
             throw SocketReadException();
           }
-          cout << ctime(&time_now) << "| Size of the vector is " << num << endl;
+          // cout << ctime(&time_now) << "| Size of the vector is " << num <<
+          // endl;
+          ss.str(string());
+          ss.clear();
+          ss << "Size of the vector is " << num;
+          my_logg.writeOutput(ss.str());
           break;
         case 4:  // clear
-          cout << ctime(&time_now) << "| Vector is cleared" << endl;
+          // cout << ctime(&time_now) << "| Vector is cleared" << endl;
+          ss.str(string());
+          ss.clear();
+          ss << "Vector is cleared";
+          my_logg.writeOutput(ss.str());
           break;
         default:  // unknown command
-          cout << "Unknown command" << endl;
+          // cout << "Unknown command" << endl;
+          ss.str(string());
+          ss.clear();
+          ss << "Unknown command";
+          my_logg.writeOutput(ss.str());
           break;
       }
     }

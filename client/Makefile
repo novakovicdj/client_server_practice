@@ -2,7 +2,7 @@ CC= g++
 
 program_name= client
 
-INC_FLAGS = -Iinclude
+INC_FLAGS = -Iinclude -I../logger/include
 
 CPP_FLAGS = $(INC_FLAGS) 
 
@@ -12,9 +12,10 @@ OBJ_DIR=obj
 
 SRC_LIST= $(wildcard $(SRC_DIR)/*.cpp)
 OBJ_LIST= $(SRC_LIST:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+LOGGER_OBJ = ../logger/obj/my_logger.o
 
 
-$(BUILD_DIR)/$(program_name): $(OBJ_LIST) | $(BUILD_DIR)
+$(BUILD_DIR)/$(program_name): $(OBJ_LIST) $(LOGGER_OBJ) | $(BUILD_DIR)
 	$(CC) -o $@ $^ $(CPP_FLAGS)
 
 $(OBJ_DIR)/%.o: src/%.cpp | $(OBJ_DIR)
